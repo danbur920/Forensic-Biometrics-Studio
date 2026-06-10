@@ -1,11 +1,3 @@
-/**
- * PLIK: src/lib/report/generate-report-shoeprint-pdf.ts
- *
- * Raport PDF dla trybu SHOEPRINT – analogiczny do generate-report-pdf.ts (odciski palców),
- * ale dostosowany do śladów butów (brak dopasowania SourceAFIS, brak rotacji wyrównawczej,
- * porównanie opiera się wyłącznie na etykietach / parowaniu przez label).
- */
-
 import html2canvas from "html2canvas";
 import { PDFDocument } from "pdf-lib";
 import { save } from "@tauri-apps/plugin-dialog";
@@ -31,9 +23,9 @@ import {
     formatReportDateTime,
     formatBytes,
     getPairedByLabel,
+    toBlobBytes,
+    toDataUrl,
 } from "./report-utils";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 type ShoeprintReportGenerationOptions = {
     reportDateTime: string;
@@ -52,8 +44,6 @@ type ImageMeta = {
     bytes: Uint8Array;
 };
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
 const PAGE = { width: 794, height: 1123, margin: 95 };
 const LANDSCAPE = { width: PAGE.height, height: PAGE.width, margin: 70 };
 
@@ -62,29 +52,6 @@ const ROWS_PER_PAGE = 4;
 const FULL_CIRCLE = Math.PI * 2;
 const CLOCKWISE_START_ANGLE = -Math.PI / 4;
 const CANVAS_CONTEXT_ERROR = "Failed to create canvas context.";
-
-// ─── Utilities ────────────────────────────────────────────────────────────────
-
-const getMimeTypeFromName = (name: string) => {
-    const lower = name.toLowerCase();
-    if (lower.endsWith(".png")) return "image/png";
-    if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
-    if (lower.endsWith(".webp")) return "image/webp";
-    if (lower.endsWith(".gif")) return "image/gif";
-    if (lower.endsWith(".bmp")) return "image/bmp";
-    return "application/octet-stream";
-};
-
-const toBlobBytes = (bytes: Uint8Array) => new Uint8Array(bytes);
-
-const toDataUrl = (bytes: Uint8Array, name: string) =>
-    new Promise<string>(resolve => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(
-            new Blob([toBlobBytes(bytes)], { type: getMimeTypeFromName(name) })
-        );
-    });
 
 const md5Bytes = (bytes: Uint8Array) => {
     const buffer = bytes.buffer.slice(
@@ -571,7 +538,9 @@ export const generateShoeprintReportPdfWithDialog = async (
                     Math.min(
                         IMAGE_CELL_SIZE,
                         leftSingleCanvas.width,
-                        leftSingleCanvas.height
+                        leftSingleCanvas.height,
+                        rightSingleCanvas.width,
+                        rightSingleCanvas.height
                     )
                 );
                 const leftCropped = cropCanvas(
@@ -584,14 +553,7 @@ export const generateShoeprintReportPdfWithDialog = async (
                     rightSingleCanvas,
                     feature.right.origin.x,
                     feature.right.origin.y,
-                    Math.max(
-                        1,
-                        Math.min(
-                            IMAGE_CELL_SIZE,
-                            rightSingleCanvas.width,
-                            rightSingleCanvas.height
-                        )
-                    )
+                    targetSize
                 );
                 return {
                     left: leftCropped.toDataURL("image/png"),

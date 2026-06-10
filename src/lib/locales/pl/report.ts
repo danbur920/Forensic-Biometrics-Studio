@@ -48,9 +48,9 @@ const d: Dictionary = {
     "Shoeprint figure 4":
         "Rys. 4 Obraz 2 z wszystkimi cechami wyznaczonymi w toku ekspertyzy",
     "Shoeprint comparative table overview":
-        "Tablica komparacyjna wybranych cech \u2013 ilustracja poglądowa",
+        "Tablica komparacyjna wybranych cech – ilustracja poglądowa",
     "Shoeprint comparative table details":
-        "Tablica komparacyjna wybranych cech \u2013 szczegóły",
+        "Tablica komparacyjna wybranych cech – szczegóły",
 };
 
 export default d;

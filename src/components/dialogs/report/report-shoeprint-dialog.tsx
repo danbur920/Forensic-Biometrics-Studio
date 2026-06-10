@@ -1,11 +1,3 @@
-/**
- * PLIK: src/components/dialogs/report/report-shoeprint-dialog.tsx
- *
- * Dialog generowania raportu PDF dla trybu SHOEPRINT.
- * Analogiczny do report-dialog.tsx (fingerprint), ale bez opcji "matched only"
- * (ślady butów nie mają SourceAFIS — parowanie tylko po etykiecie).
- */
-
 import { useEffect, useState } from "react";
 import {
     Dialog,
@@ -26,7 +18,10 @@ import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { MarkingsStore } from "@/lib/stores/Markings";
 import { WorkingModeStore } from "@/lib/stores/WorkingMode";
 import { WORKING_MODE } from "@/views/selectMode";
-import { formatReportDateTime } from "@/lib/report/report-utils";
+import {
+    formatReportDateTime,
+    getPairedByLabel,
+} from "@/lib/report/report-utils";
 import { generateShoeprintReportPdfWithDialog } from "@/lib/report/generate-report-shoeprint-pdf";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils/shadcn";
@@ -73,19 +68,23 @@ export function ReportShoeprintDialog({
     }, [isOpen, reportDefaults]);
 
     const workingMode = WorkingModeStore.use(state => state.workingMode);
-    const leftCount = MarkingsStore(CANVAS_ID.LEFT).use(
-        state => state.markings.length
+    const markingsLeft = MarkingsStore(CANVAS_ID.LEFT).use(
+        state => state.markings
     );
-    const rightCount = MarkingsStore(CANVAS_ID.RIGHT).use(
-        state => state.markings.length
+    const markingsRight = MarkingsStore(CANVAS_ID.RIGHT).use(
+        state => state.markings
     );
+    const leftCount = markingsLeft.length;
+    const rightCount = markingsRight.length;
+    const pairedCount = getPairedByLabel(markingsLeft, markingsRight).length;
 
     const generateReportLabel = t("Generate report", { ns: "keywords" });
 
     const canGenerate =
         workingMode === WORKING_MODE.SHOEPRINT &&
         leftCount > 0 &&
-        rightCount > 0;
+        rightCount > 0 &&
+        pairedCount > 0;
 
     const onGenerate = async () => {
         if (!canGenerate) return;
@@ -109,14 +108,13 @@ export function ReportShoeprintDialog({
             toast.success(t("Report generated", { ns: "tooltip" }));
             setIsOpen(false);
         } catch (error) {
-            // eslint-disable-next-line no-console
             console.error(error);
             const message =
                 error instanceof Error ? error.message : String(error);
-            toast.error(
-                `${t("Failed to generate report", { ns: "tooltip" })}: ${message}`
+            showErrorDialog(
+                `${t("Failed to generate report", { ns: "tooltip" })}: ${message}`,
+                "error"
             );
-            showErrorDialog(message, "error");
         } finally {
             setIsGenerating(false);
         }
@@ -169,6 +167,12 @@ export function ReportShoeprintDialog({
                                         ns: "keywords",
                                     })}
                                     : <strong>{rightCount}</strong>
+                                </div>
+                                <div>
+                                    {t("Shoeprint paired features count", {
+                                        ns: "report",
+                                    })}
+                                    : <strong>{pairedCount}</strong>
                                 </div>
                             </div>
 

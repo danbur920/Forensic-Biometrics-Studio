@@ -46,9 +46,9 @@ const d: Dictionary = {
     "Shoeprint figure 4":
         "Fig. 4 Image 2 with all features determined during examination",
     "Shoeprint comparative table overview":
-        "Comparative table of selected features \u2013 overview",
+        "Comparative table of selected features - overview",
     "Shoeprint comparative table details":
-        "Comparative table of selected features \u2013 details",
+        "Comparative table of selected features - details",
 };
 
 export default d;

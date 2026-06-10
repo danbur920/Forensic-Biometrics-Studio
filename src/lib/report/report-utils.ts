@@ -76,3 +76,27 @@ export const formatBytes = (bytes: number) => {
     const mb = kb / 1024;
     return `${mb.toFixed(2)} MB`;
 };
+
+export const getMimeTypeFromName = (name: string): string => {
+    const lower = name.toLowerCase();
+    if (lower.endsWith(".png")) return "image/png";
+    if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
+    if (lower.endsWith(".webp")) return "image/webp";
+    if (lower.endsWith(".gif")) return "image/gif";
+    if (lower.endsWith(".bmp")) return "image/bmp";
+    return "application/octet-stream";
+};
+
+export const toBlobBytes = (bytes: Uint8Array): Uint8Array =>
+    new Uint8Array(bytes);
+
+export const toDataUrl = (bytes: Uint8Array, name: string): Promise<string> =>
+    new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(
+            new Blob([toBlobBytes(bytes)], {
+                type: getMimeTypeFromName(name),
+            })
+        );
+    });
