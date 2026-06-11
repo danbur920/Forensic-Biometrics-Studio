@@ -81,14 +81,14 @@ const getSystemId = async () => {
     }
 };
 
-const getSpritePath = async (sprite: PIXI.Sprite) => {
+const getSpritePath = (sprite: PIXI.Sprite) => {
     // @ts-expect-error custom property
     const path = sprite.path as string | null;
     return path ?? null;
 };
 
 const getImageMeta = async (sprite: PIXI.Sprite): Promise<ImageMeta> => {
-    const fullPath = await getSpritePath(sprite);
+    const fullPath = getSpritePath(sprite);
     if (!fullPath) throw new Error("Missing image path for report generation.");
     const bytes = await readFile(fullPath);
     const bitmap = await createImageBitmap(new Blob([toBlobBytes(bytes)]));
@@ -326,8 +326,6 @@ const ensureImagesLoaded = async (container: HTMLElement) => {
     );
 };
 
-// ─── DOM helpers ──────────────────────────────────────────────────────────────
-
 const createPage = () => {
     const page = document.createElement("div");
     page.className = "report-page";
@@ -428,8 +426,6 @@ const createFigurePage = (
     return page;
 };
 
-// ─── Main export ──────────────────────────────────────────────────────────────
-
 /* eslint-disable sonarjs/cognitive-complexity */
 export const generateShoeprintReportPdfWithDialog = async (
     options: ShoeprintReportGenerationOptions
@@ -486,7 +482,7 @@ export const generateShoeprintReportPdfWithDialog = async (
         const markingsRight = MarkingsStore(CANVAS_ID.RIGHT).state.markings;
         const markingTypes = MarkingTypesStore.state.types;
 
-        // Dla śladów butów używamy wyłącznie parowania po etykiecie
+        // For shoeprints, pairing is done exclusively by label
         const paired = getPairedByLabel(markingsLeft, markingsRight);
 
         stage = "read-image-meta";
@@ -511,7 +507,7 @@ export const generateShoeprintReportPdfWithDialog = async (
             1.6
         );
 
-        // Wycinki szczegółowe (bez rotacji wyrównawczej – buty nie mają SourceAFIS)
+        // Detail crops (no alignment rotation – shoeprints do not use SourceAFIS)
         const detailCrops = await Promise.all(
             paired.map(async feature => {
                 const [leftSingleCanvas, rightSingleCanvas] = await Promise.all(
@@ -577,24 +573,11 @@ export const generateShoeprintReportPdfWithDialog = async (
         ].join("|");
         const reportId = md5String(reportIdInput);
 
-        const decodeUnicodeEscapes = (value: string) =>
-            value.replace(/\\u([0-9a-fA-F]{4})/g, (_m, hex) =>
-                String.fromCharCode(parseInt(hex, 16))
-            );
-        const stripDiacritics = (value: string) => value;
+        const performedBy =
+            options.performedBy?.trim() || reportSettings?.performedBy || "-";
+        const department =
+            options.department?.trim() || reportSettings?.department || "-";
 
-        const performedBy = stripDiacritics(
-            decodeUnicodeEscapes(
-                options.performedBy?.trim() ||
-                    reportSettings?.performedBy ||
-                    "-"
-            )
-        );
-        const department = stripDiacritics(
-            decodeUnicodeEscapes(
-                options.department?.trim() || reportSettings?.department || "-"
-            )
-        );
         const addressFallback = [
             reportSettings?.addressLine1,
             reportSettings?.addressLine2,
@@ -603,12 +586,12 @@ export const generateShoeprintReportPdfWithDialog = async (
         ]
             .map(line => line?.trim())
             .filter(Boolean) as string[];
+
         const addressLines =
             options.addressLines?.map(line => line.trim()).filter(Boolean) ??
             [];
-        const address = (
-            addressLines.length > 0 ? addressLines : addressFallback
-        ).map(line => stripDiacritics(decodeUnicodeEscapes(line)));
+        const address =
+            addressLines.length > 0 ? addressLines : addressFallback;
 
         const appVersion = await getVersion();
 
@@ -672,8 +655,7 @@ export const generateShoeprintReportPdfWithDialog = async (
     `;
 
         const pages: HTMLElement[] = [page1];
-
-        // Rys. 1–4: oryginały + adnotacje
+        // Fig. 1–4: originals + annotations
         pages.push(
             createFigurePage(
                 tReport("Figure 1"),
@@ -715,7 +697,7 @@ export const generateShoeprintReportPdfWithDialog = async (
             )
         );
 
-        // Strona poglądowa (landscape)
+        // Overview page (landscape)
         const leftOverview = await createOverviewCalloutImage(
             leftMeta.bytes,
             paired.map(x => x.left)
@@ -736,7 +718,7 @@ export const generateShoeprintReportPdfWithDialog = async (
     `;
         pages.push(overviewPage);
 
-        // Tablica szczegółów
+        // Detail table
         const detailsStartIndex = pages.length;
         paired.forEach((feature, idx) => {
             const pageIndex = Math.floor(idx / ROWS_PER_PAGE);
