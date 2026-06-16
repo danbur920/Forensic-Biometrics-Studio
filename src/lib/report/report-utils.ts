@@ -1,4 +1,5 @@
 import { MarkingClass } from "@/lib/markings/MarkingClass";
+import SparkMD5 from "spark-md5";
 
 export type MatchedFeature = {
     id: string;
@@ -100,3 +101,10 @@ export const toDataUrl = (bytes: Uint8Array, name: string): Promise<string> =>
             })
         );
     });
+
+export const md5Bytes = (bytes: Uint8Array): string => {
+    const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+    return SparkMD5.ArrayBuffer.hash(buffer);
+};
+
+export const md5String = (value: string): string => SparkMD5.hash(value);

@@ -91,6 +91,10 @@ export type i18nKeywords = Recordify<
     | "Modifiers"
     | "No modifiers yet"
     | "Compute"
+    | "Unique features color"
+    | "Color red"
+    | "Color green"
+    | "Report title"
 >;
 
 export type i18nDescription = Recordify<
@@ -294,4 +298,8 @@ export type i18nReport = Recordify<
     | "Shoeprint figure 4"
     | "Shoeprint comparative table overview"
     | "Shoeprint comparative table details"
+    | "Shoeprint pattern features title"
+    | "Shoeprint group features title"
+    | "Shoeprint feature type prefix"
+    | "Shoeprint no unique features"
 >;

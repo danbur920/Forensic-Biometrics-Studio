@@ -51,6 +51,14 @@ const d: Dictionary = {
         "Tablica komparacyjna wybranych cech – ilustracja poglądowa",
     "Shoeprint comparative table details":
         "Tablica komparacyjna wybranych cech – szczegóły",
+    "Shoeprint pattern features title":
+        "Cechy strukturalne o znaczeniu klasyfikacyjnym",
+    "Shoeprint group features title":
+        "Cechy grupowe o znaczeniu klasyfikacyjnym",
+    "Shoeprint feature type prefix": 
+        "Cechy typu:",
+    "Shoeprint no unique features": 
+        "Brak cech unikalnych.",
 };
 
 export default d;

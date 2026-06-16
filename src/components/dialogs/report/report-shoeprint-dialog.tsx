@@ -36,7 +36,7 @@ type ReportShoeprintDialogProps = {
 export function ReportShoeprintDialog({
     className,
 }: ReportShoeprintDialogProps) {
-    const { t } = useTranslation();
+    const { t } = useTranslation("keywords");
     const [isOpen, setIsOpen] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
 
@@ -54,6 +54,8 @@ export function ReportShoeprintDialog({
     const [addressLine3, setAddressLine3] = useState("");
     const [addressLine4, setAddressLine4] = useState("");
     const [reportLanguage, setReportLanguage] = useState(i18n.language);
+    const [reportTitle, setReportTitle] = useState("");
+    const [uniqueColor, setUniqueColor] = useState<"red" | "green">("red");
 
     useEffect(() => {
         if (!isOpen) return;
@@ -65,6 +67,7 @@ export function ReportShoeprintDialog({
         setAddressLine3(reportDefaults?.addressLine3 ?? "");
         setAddressLine4(reportDefaults?.addressLine4 ?? "");
         setReportLanguage(i18n.language);
+        setReportTitle(t("Shoeprint report title", { ns: "report" }));
     }, [isOpen, reportDefaults]);
 
     const workingMode = WorkingModeStore.use(state => state.workingMode);
@@ -104,6 +107,8 @@ export function ReportShoeprintDialog({
                     addressLine3.trim(),
                     addressLine4.trim(),
                 ],
+                uniqueColor,
+                reportTitle: reportTitle.trim() || undefined,
             });
             toast.success(t("Report generated", { ns: "tooltip" }));
             setIsOpen(false);
@@ -169,14 +174,22 @@ export function ReportShoeprintDialog({
                                     : <strong>{rightCount}</strong>
                                 </div>
                                 <div>
-                                    {t("Shoeprint paired features count", {
-                                        ns: "report",
-                                    })}
-                                    : <strong>{pairedCount}</strong>
+                                    {t("Shoeprint paired features count", { ns: "report" })}: <strong>{pairedCount}</strong>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 gap-3">
+                                <div className="flex flex-col gap-1.5">
+                                    <label htmlFor="shoeprint-report-title" className="text-sm font-medium">
+                                        {t("Report title", { ns: "keywords" })}
+                                    </label>
+                                    <Input
+                                        id="shoeprint-report-title"
+                                        value={reportTitle}
+                                        onChange={e => setReportTitle(e.target.value)}
+                                        placeholder={t("Shoeprint report title", { ns: "report" })}
+                                    />
+                                </div>
                                 <div className="flex flex-col gap-1.5">
                                     <label
                                         htmlFor="shoeprint-report-language"
@@ -194,6 +207,20 @@ export function ReportShoeprintDialog({
                                     >
                                         <option value="pl">Polski</option>
                                         <option value="en">English</option>
+                                    </select>
+                                </div>
+
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-sm font-medium">
+                                        {t("Unique features color", { ns: "keywords" })}
+                                    </label>
+                                    <select
+                                        className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+                                        value={uniqueColor}
+                                        onChange={e => setUniqueColor(e.target.value as "red" | "green")}
+                                    >
+                                        <option value="red">{t("Color red", { ns: "keywords" })}</option>
+                                        <option value="green">{t("Color green", { ns: "keywords" })}</option>
                                     </select>
                                 </div>
 

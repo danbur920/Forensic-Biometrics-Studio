@@ -84,6 +84,10 @@ const d: Dictionary = {
     Modifiers: "Modifiers",
     "No modifiers yet": "No modifiers yet",
     Compute: "Compute",
+    "Unique features color": "Unique features color",
+    "Color red": "Red",
+    "Color green": "Green",
+    "Report title": "Report title",
 };
 
 export default d;
