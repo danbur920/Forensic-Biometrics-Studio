@@ -84,7 +84,7 @@ export function MarkingTypesTable({
                 {types.length === 0 ? (
                     <TableRow>
                         <TableCell
-                            colSpan={9}
+                            colSpan={8}
                             className="text-center py-8 text-muted-foreground"
                         >
                             {t(
