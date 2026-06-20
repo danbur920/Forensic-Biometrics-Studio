@@ -41,9 +41,7 @@ next-env.d.ts
 # vite cache
 .vite/
 
-<<<<<<< HEAD
 src-tauri/gen/schemas/capabilities.json
-=======
 # pyfing sidecar build artifacts
 /.venv-pyfing/
 /dist-pyinstaller/
@@ -58,4 +56,3 @@ src-tauri/gen/schemas/capabilities.json
 # local installer / toolchain artifacts (not project files)
 /Setup.msix
 /rustup-init.exe
->>>>>>> upstream/master
